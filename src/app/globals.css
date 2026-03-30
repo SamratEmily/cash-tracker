@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Outfit", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-brand-green: #10B981;
+  --color-brand-red: #EF4444;
+  --color-glass: rgba(255, 255, 255, 0.1);
+}
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-50 min-h-screen selection:bg-emerald-500/30;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl;
+  }
+  
+  .btn-primary {
+    @apply px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition-all active:scale-95 shadow-lg shadow-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .btn-secondary {
+    @apply px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl transition-all active:scale-95 border border-white/5;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 bg-slate-900 border border-white/10 rounded-xl focus:ring-2 focus:ring-emerald-500/50 outline-none transition-all placeholder:text-slate-500;
+  }
+
+  .badge-income {
+    @apply px-2 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-md text-sm font-medium;
+  }
+
+  .badge-expense {
+    @apply px-2 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-md text-sm font-medium;
+  }
+  
+  .badge-receivable {
+    @apply px-2 py-1 bg-emerald-500/5 text-emerald-300 border border-emerald-500/10 rounded-md text-sm font-medium underline decoration-dotted;
+  }
+
+  .badge-payable {
+    @apply px-2 py-1 bg-rose-500/5 text-rose-300 border border-rose-500/10 rounded-md text-sm font-medium underline decoration-dotted;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
