@@ -7,11 +7,14 @@ import {
   LogOut, Plus, Wallet, TrendingUp, TrendingDown, 
   HandCoins, LayoutDashboard, History, Filter, 
   Trash2, Edit3, X, Save, AlertCircle, Calendar,
-  ArrowRightLeft, User, DollarSign
+  ArrowRightLeft, User, DollarSign, Download, 
+  FileSpreadsheet, FileText, FileDown
 } from "lucide-react";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { 
   format, subDays, subMonths, isAfter, 
-  startOfWeek, startOfMonth, eachDayOfInterval 
+  startOfWeek, startOfMonth, eachDayOfInterval, parseISO
 } from "date-fns";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -195,6 +198,78 @@ export default function Dashboard() {
     return s;
   }, [timeFilteredTransactions]);
 
+  // Export Functions
+  const exportCSV = () => {
+    // 1. Recalculate balances for all records to ensure the correct "Running Balance"
+    const sortedAll = [...transactions].sort((a,b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    let bal = 0;
+    const map: Record<string, number> = {};
+    sortedAll.forEach(tx => {
+      const isPos = tx.category === "INCOME" || tx.category === "RECEIVABLE";
+      bal += isPos ? tx.amount : -tx.amount;
+      map[tx.id] = bal;
+    });
+
+    // 2. Prepare headers
+    const headers = ["Date", "Time", "Category", "Description", "Amount", "Balance"];
+    
+    // 3. Map filtered transactions
+    const rows = filteredTransactions.map(tx => {
+      const dateObj = new Date(tx.createdAt);
+      return [
+        format(dateObj, "yyyy-MM-dd"),     // Clear date
+        format(dateObj, "HH:mm:ss"),      // Clear time
+        tx.category,
+        tx.description,
+        tx.amount,
+        map[tx.id]                        // Running balance at that moment
+      ];
+    });
+    
+    const csvContent = [headers, ...rows].map(row => 
+      row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")
+    ).join("\n");
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `ledger_${activeTab.toLowerCase()}_${timeFilter.toLowerCase()}_${format(new Date(), "yyyyMMdd")}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportPDF = () => {
+    const doc = new jsPDF();
+    const title = `Expense Tracker Ledger - ${activeTab} (${timeFilter})`;
+    
+    doc.setFontSize(18);
+    doc.setTextColor(16, 185, 129); // Emerald-500
+    doc.text(title, 14, 20);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Generated on: ${format(new Date(), "PPpp")}`, 14, 28);
+    doc.text(`Total Balance for period: $${stats.net.toLocaleString()}`, 14, 34);
+
+    autoTable(doc, {
+      startY: 40,
+      head: [['Date & Time', 'Category', 'Description', 'Amount']],
+      body: filteredTransactions.map(tx => [
+        format(new Date(tx.createdAt), "MMM dd, yyyy HH:mm"),
+        tx.category,
+        tx.description,
+        `$${tx.amount.toLocaleString()}`
+      ]),
+      headStyles: { fillColor: [16, 185, 129], textColor: [255, 255, 255], fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [245, 253, 250] },
+      margin: { top: 40 },
+    });
+    
+    doc.save(`ledger_${activeTab.toLowerCase()}_${timeFilter.toLowerCase()}.pdf`);
+  };
+
   if (status === "loading" || loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-slate-950">
@@ -215,7 +290,26 @@ export default function Dashboard() {
           <p className="text-slate-400 mt-1">Welcome back, {session?.user?.name?.split(" ")[0] || "User"}</p>
         </div>
         
-        <div className="flex items-center gap-4">
+         <div className="flex flex-wrap items-center gap-4">
+          <div className="flex bg-slate-900 border border-white/5 rounded-xl overflow-hidden shadow-lg">
+             <button 
+               onClick={exportCSV}
+               className="p-3 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/5 transition-all flex items-center gap-2 border-r border-white/5"
+               title="Export to CSV"
+             >
+               <FileSpreadsheet size={20} />
+               <span className="hidden sm:inline text-xs font-bold uppercase tracking-widest">CSV</span>
+             </button>
+             <button 
+               onClick={exportPDF}
+               className="p-3 text-slate-400 hover:text-rose-400 hover:bg-rose-500/5 transition-all flex items-center gap-2"
+               title="Export to PDF"
+             >
+               <FileText size={20} />
+               <span className="hidden sm:inline text-xs font-bold uppercase tracking-widest">PDF</span>
+             </button>
+          </div>
+
           <button 
             onClick={() => {
               setEditingId(null);
