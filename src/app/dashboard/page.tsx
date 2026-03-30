@@ -9,9 +9,17 @@ import {
   Trash2, Edit3, X, Save, AlertCircle, Calendar,
   ArrowRightLeft, User, DollarSign
 } from "lucide-react";
-import { format } from "date-fns";
+import { 
+  format, subDays, subMonths, isAfter, 
+  startOfWeek, startOfMonth, eachDayOfInterval 
+} from "date-fns";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, 
+  Tooltip, ResponsiveContainer, AreaChart, Area, 
+  PieChart, Pie, Cell, Legend
+} from 'recharts';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -43,6 +51,7 @@ export default function Dashboard() {
   });
 
   const [activeTab, setActiveTab] = useState<Category | "ALL">("ALL");
+  const [timeFilter, setTimeFilter] = useState<"ALL" | "WEEK" | "MONTH">("ALL");
   
   const tabs = [
     { id: "ALL", label: "Overview", icon: LayoutDashboard },
@@ -72,10 +81,62 @@ export default function Dashboard() {
     }
   }, [status, router]);
 
+  const timeFilteredTransactions = useMemo(() => {
+    const now = new Date();
+    if (timeFilter === "ALL") return transactions;
+    
+    // For "This Week", we use start of the week. For "This Month", start of the month.
+    // However, "Last 7 days" and "Last 30 days" are often more intuitive.
+    // Let's go with "Last 7 days" and "Last 30 days" as requested by "Weekly/Monthly".
+    const startDate = timeFilter === "WEEK" ? subDays(now, 7) : subMonths(now, 1);
+    
+    return transactions.filter(tx => isAfter(new Date(tx.createdAt), startDate));
+  }, [transactions, timeFilter]);
+
   const filteredTransactions = useMemo(() => {
-    if (activeTab === "ALL") return transactions;
-    return transactions.filter(tx => tx.category === activeTab);
-  }, [transactions, activeTab]);
+    if (activeTab === "ALL") return timeFilteredTransactions;
+    return timeFilteredTransactions.filter(tx => tx.category === activeTab);
+  }, [timeFilteredTransactions, activeTab]);
+
+  // Chart Data Preparation
+  const chartData = useMemo(() => {
+    const dataMap: Record<string, { name: string, income: number, expense: number, payable: number, receivable: number }> = {};
+    
+    // Last 7 days or 30 days depending on filter
+    const days = timeFilter === "ALL" ? 7 : (timeFilter === "WEEK" ? 7 : 30);
+    const now = new Date();
+    
+    for (let i = days - 1; i >= 0; i--) {
+      const d = subDays(now, i);
+      const label = format(d, "MMM dd");
+      dataMap[label] = { name: label, income: 0, expense: 0, payable: 0, receivable: 0 };
+    }
+
+    timeFilteredTransactions.forEach(tx => {
+      const label = format(new Date(tx.createdAt), "MMM dd");
+      if (dataMap[label]) {
+        if (tx.category === "INCOME") dataMap[label].income += tx.amount;
+        else if (tx.category === "EXPENSE") dataMap[label].expense += tx.amount;
+        else if (tx.category === "PAYABLE") dataMap[label].payable += tx.amount;
+        else if (tx.category === "RECEIVABLE") dataMap[label].receivable += tx.amount;
+      }
+    });
+
+    return Object.values(dataMap);
+  }, [timeFilteredTransactions, timeFilter]);
+
+  const pieData = useMemo(() => {
+    const counts = { INCOME: 0, EXPENSE: 0, PAYABLE: 0, RECEIVABLE: 0 };
+    timeFilteredTransactions.forEach(tx => {
+      counts[tx.category] += tx.amount;
+    });
+    return [
+      { name: 'Income', value: counts.INCOME, color: '#10B981' },
+      { name: 'Expense', value: counts.EXPENSE, color: '#EF4444' },
+      { name: 'Payable', value: counts.PAYABLE, color: '#F43F5E' },
+      { name: 'Receivable', value: counts.RECEIVABLE, color: '#34D399' },
+    ].filter(d => d.value > 0);
+  }, [timeFilteredTransactions]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,21 +181,19 @@ export default function Dashboard() {
     setIsModalOpen(true);
   };
 
-  // Calculations
+  // Calculations based on time filter
   const stats = useMemo(() => {
     const s = { income: 0, expense: 0, receivable: 0, payable: 0, net: 0 };
-    transactions.forEach(tx => {
+    timeFilteredTransactions.forEach(tx => {
       const amt = tx.amount;
       if (tx.category === "INCOME") s.income += amt;
       else if (tx.category === "EXPENSE") s.expense += amt;
       else if (tx.category === "RECEIVABLE") s.receivable += amt;
       else if (tx.category === "PAYABLE") s.payable += amt;
     });
-    // Net Calculation: (Income + Receivable) - (Expense + Payable)
-    // Or maybe Income - Expense. Let's do (Income + Receivable) - (Expense + Payable) for overall balance.
     s.net = (s.income + s.receivable) - (s.expense + s.payable);
     return s;
-  }, [transactions]);
+  }, [timeFilteredTransactions]);
 
   if (status === "loading" || loading) {
     return (
@@ -197,22 +256,45 @@ export default function Dashboard() {
       </header>
 
       {/* Navigation Tabs */}
-      <nav className="flex flex-wrap items-center gap-2 mb-8 animate-fade-in delay-75">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id as Category | "ALL")}
-            className={cn(
-               "flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold transition-all border",
-               activeTab === tab.id 
-                 ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 ring-1 ring-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]" 
-                 : "bg-slate-900/50 text-slate-400 border-white/5 hover:bg-slate-900 hover:text-slate-200"
-            )}
-          >
-            <tab.icon size={18} />
-            {tab.label}
-          </button>
-        ))}
+      <nav className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 animate-fade-in delay-75">
+        <div className="flex flex-wrap items-center gap-2">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as Category | "ALL")}
+              className={cn(
+                 "flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border",
+                 activeTab === tab.id 
+                   ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 ring-1 ring-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]" 
+                   : "bg-slate-900/50 text-slate-400 border-white/5 hover:bg-slate-900 hover:text-slate-200"
+              )}
+            >
+              <tab.icon size={16} />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-1 bg-slate-900/50 p-1 rounded-2xl border border-white/5">
+           {[
+             { id: "ALL", label: "All Time" },
+             { id: "WEEK", label: "This Week" },
+             { id: "MONTH", label: "This Month" }
+           ].map((f) => (
+             <button
+               key={f.id}
+               onClick={() => setTimeFilter(f.id as any)}
+               className={cn(
+                 "px-4 py-2 rounded-xl text-xs font-bold transition-all",
+                 timeFilter === f.id 
+                   ? "bg-white/10 text-white shadow-sm" 
+                   : "text-slate-500 hover:text-slate-300"
+               )}
+             >
+               {f.label}
+             </button>
+           ))}
+        </div>
       </nav>
 
       {/* Stats Grid */}
@@ -246,6 +328,113 @@ export default function Dashboard() {
           desc="Spendings this period"
         />
       </div>
+      
+      {/* Analytics Section */}
+      {activeTab === "ALL" && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12 animate-fade-in delay-200">
+          <div className="lg:col-span-2 glass-card p-6 h-[400px]">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <TrendingUp size={20} className="text-emerald-500" />
+                Cash Flow Analysis
+              </h3>
+              <div className="flex items-center gap-4 text-xs font-bold">
+                 <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-emerald-500"></div> <span className="text-slate-400">Income</span></div>
+                 <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-rose-500"></div> <span className="text-slate-400">Expense</span></div>
+              </div>
+            </div>
+            <div className="w-full h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData}>
+                  <defs>
+                    <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#EF4444" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#EF4444" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                  <XAxis 
+                    dataKey="name" 
+                    stroke="#64748b" 
+                    fontSize={10} 
+                    tickLine={false} 
+                    axisLine={false}
+                    dy={10}
+                  />
+                  <YAxis 
+                    stroke="#64748b" 
+                    fontSize={10} 
+                    tickLine={false} 
+                    axisLine={false}
+                    tickFormatter={(value) => `$${value}`}
+                  />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #ffffff10', borderRadius: '12px' }}
+                    itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
+                  />
+                  <Area type="monotone" dataKey="income" stroke="#10B981" fillOpacity={1} fill="url(#colorIncome)" strokeWidth={3} />
+                  <Area type="monotone" dataKey="expense" stroke="#EF4444" fillOpacity={1} fill="url(#colorExpense)" strokeWidth={3} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className="glass-card p-6 h-[400px]">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-6">
+              <Filter size={20} className="text-emerald-500" />
+              Allocation
+            </h3>
+            <div className="w-full h-[250px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #ffffff10', borderRadius: '12px' }}
+                  />
+                  <Legend 
+                    verticalAlign="bottom" 
+                    height={36} 
+                    content={({ payload }) => (
+                      <ul className="flex flex-wrap justify-center gap-4 mt-4">
+                        {payload?.map((entry: any, index: number) => (
+                          <li key={`item-${index}`} className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
+                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }}></div>
+                            {entry.value}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="mt-4 p-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/10">
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Top Insight</p>
+              <p className="text-sm text-slate-300 font-medium">
+                {stats.income > stats.expense 
+                  ? "Your income is higher than expenses this period. Keep it up!" 
+                  : "Your expenses are exceeding your income. Time to review your budget."}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Content Area */}
       <div className="grid grid-cols-1 gap-8 animate-fade-in delay-200">
