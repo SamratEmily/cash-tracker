@@ -349,7 +349,7 @@ export default function Dashboard() {
               )}
               <button 
                 onClick={() => signOut()}
-                className="p-1.5 text-slate-400 hover:text-white transition-colors"
+                className="p-1.5 text-slate-400 hover:text-emerald-500 transition-colors"
                 title="Logout"
               >
                 <LogOut size={16} />
@@ -369,8 +369,8 @@ export default function Dashboard() {
                   className={cn(
                     "flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border",
                     activeTab === tab.id 
-                      ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 ring-1 ring-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]" 
-                      : "bg-slate-900/50 text-slate-400 border-white/5 hover:bg-slate-900 hover:text-slate-200"
+                      ? "bg-emerald-500 text-white border-emerald-400 shadow-xl shadow-emerald-500/10" 
+                      : "bg-white dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-emerald-500 dark:hover:text-emerald-400"
                   )}
                 >
                   <tab.icon size={16} />
@@ -379,7 +379,7 @@ export default function Dashboard() {
               ))}
             </div>
 
-            <div className="flex items-center gap-1 bg-slate-900/50 p-1 rounded-2xl border border-white/5">
+            <div className="flex items-center gap-1 bg-white/50 dark:bg-slate-900/50 p-1 rounded-2xl border border-slate-200 dark:border-white/5 backdrop-blur-md">
               {[
                 { id: "ALL", label: "All Time" },
                 { id: "WEEK", label: "This Week" },
@@ -391,8 +391,8 @@ export default function Dashboard() {
                   className={cn(
                     "px-4 py-2 rounded-xl text-xs font-bold transition-all",
                     timeFilter === f.id 
-                      ? "bg-white/10 text-white shadow-sm" 
-                      : "text-slate-500 hover:text-slate-300"
+                      ? "bg-emerald-500 text-white shadow-lg" 
+                      : "text-slate-500 dark:text-slate-400 hover:text-emerald-500 dark:hover:text-slate-200"
                   )}
                 >
                   {f.label}
@@ -401,13 +401,13 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="hidden lg:flex items-center gap-4 border-l border-white/5 pl-6">
-            <div className="flex bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden">
-               <button onClick={exportCSV} className="p-3 text-slate-400 hover:text-white hover:bg-emerald-500/10 transition-colors border-r border-white/5" title="Export CSV">
-                 <FileSpreadsheet size={20} />
+          <div className="hidden lg:flex items-center gap-4 border-l border-slate-200 dark:border-white/5 pl-6">
+            <div className="flex bg-white/50 dark:bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-white/5 rounded-2xl overflow-hidden">
+               <button onClick={exportCSV} className="p-3 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-white hover:bg-emerald-500/10 transition-colors border-r border-slate-200 dark:border-white/5" title="Export CSV">
+                 <FileSpreadsheet size={18} />
                </button>
-               <button onClick={exportPDF} className="p-3 text-slate-400 hover:text-white hover:bg-rose-500/10 transition-colors" title="Export PDF">
-                 <FileText size={20} />
+               <button onClick={exportPDF} className="p-3 text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-white hover:bg-rose-500/10 transition-colors" title="Export PDF">
+                 <FileText size={18} />
                </button>
             </div>
             
@@ -428,24 +428,24 @@ export default function Dashboard() {
         {/* Mobile Filter Status Bar */}
         <div 
           onClick={() => setIsDrawerOpen(true)}
-          className="lg:hidden flex items-center justify-between bg-white/[0.03] backdrop-blur-md p-4 mb-8 rounded-[24px] border border-white/10 cursor-pointer hover:bg-white/[0.05] transition-all shadow-xl"
+          className="lg:hidden flex items-center justify-between bg-card dark:bg-white/[0.03] backdrop-blur-md p-4 mb-8 rounded-[24px] border border-border dark:border-white/10 cursor-pointer hover:bg-slate-50 dark:hover:bg-white/[0.05] transition-all shadow-xl"
         >
           <div className="flex items-center gap-3">
-             <div className="p-2 bg-emerald-500/20 rounded-xl text-emerald-400">
+             <div className="p-2 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-xl text-emerald-600 dark:text-emerald-400">
                 <Filter size={18} />
              </div>
              <div>
-               <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest pl-0.5">Filter Active</p>
-               <div className="flex items-center gap-2 text-sm font-bold text-slate-100">
+               <p className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-widest pl-0.5">Filter Active</p>
+               <div className="flex items-center gap-2 text-sm font-bold text-foreground">
                   <span>{tabs.find(t => t.id === activeTab)?.label}</span>
-                  <span className="w-1 h-1 rounded-full bg-slate-600"></span>
-                  <span className="text-slate-400 font-medium">
+                  <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">
                     {timeFilter === "ALL" ? "All Time" : timeFilter === "WEEK" ? "7 Days" : "30 Days"}
                   </span>
                </div>
              </div>
           </div>
-          <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-500">
+          <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
             <Menu size={16} />
           </div>
         </div>
@@ -736,7 +736,7 @@ export default function Dashboard() {
               </tbody>
                {filteredTransactions.length > 0 && (
                 <tfoot>
-                  <tr className="bg-slate-900/50">
+                  <tr className="bg-slate-50 dark:bg-slate-900/50 transition-colors">
                     <td colSpan={3} className="px-6 py-4 font-bold text-slate-400 uppercase text-xs tracking-tighter">
                       {activeTab === "ALL" ? "Ledger Summary" : `${activeTab} Total`} (Items: {filteredTransactions.length})
                     </td>
