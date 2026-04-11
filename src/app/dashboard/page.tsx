@@ -8,7 +8,7 @@ import {
   HandCoins, LayoutDashboard, History, Filter, 
   Trash2, Edit3, X, Save, AlertCircle, Calendar,
   ArrowRightLeft, User, DollarSign, Download, 
-  FileSpreadsheet, FileText, FileDown
+  FileSpreadsheet, FileText, FileDown, Menu
 } from "lucide-react";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -44,6 +44,7 @@ export default function Dashboard() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   
   // Form State
@@ -286,128 +287,151 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 p-4 md:p-8">
-      {/* Header */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 animate-fade-in">
-        <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            <LayoutDashboard className="text-emerald-500" />
-            Financial Dashboard
-          </h1>
-          <p className="text-slate-400 mt-1">Welcome back, {session?.user?.name?.split(" ")[0] || "User"}</p>
-        </div>
-        
-         <div className="flex flex-wrap items-center gap-4">
-          <div className="flex bg-slate-900 border border-white/5 rounded-xl overflow-hidden shadow-lg">
-             <button 
-               onClick={exportCSV}
-               className="p-3 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/5 transition-all flex items-center gap-2 border-r border-white/5"
-               title="Export to CSV"
-             >
-               <FileSpreadsheet size={20} />
-               <span className="hidden sm:inline text-xs font-bold uppercase tracking-widest">CSV</span>
-             </button>
-             <button 
-               onClick={exportPDF}
-               className="p-3 text-slate-400 hover:text-rose-400 hover:bg-rose-500/5 transition-all flex items-center gap-2"
-               title="Export to PDF"
-             >
-               <FileText size={20} />
-               <span className="hidden sm:inline text-xs font-bold uppercase tracking-widest">PDF</span>
-             </button>
-          </div>
+    <div className="min-h-screen bg-slate-950 pb-24 md:pb-8">
+      {/* Premium Gradient Backgrounds */}
+      <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
+        <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-600/10 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/5 blur-[120px] rounded-full"></div>
+      </div>
 
-          <button 
-            onClick={() => {
-              setEditingId(null);
-              setFormData({ 
-                description: "", 
-                amount: "", 
-                category: activeTab !== "ALL" ? activeTab : "EXPENSE" 
-              });
-              setIsModalOpen(true);
-            }}
-            className="btn-primary flex items-center gap-2 group"
-          >
-            <Plus size={20} className="group-hover:rotate-90 transition-transform" />
-            Add Transaction
-          </button>
+      <div className="relative z-10 p-4 md:p-8">
+        {/* Header */}
+        <header className="flex items-center justify-between mb-8 animate-fade-in">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2">
+              <span className="bg-emerald-500 p-1.5 rounded-lg lg:hidden">
+                <Wallet size={20} className="text-white" />
+              </span>
+              <LayoutDashboard size={28} className="text-emerald-500 hidden lg:block" />
+              <span className="hidden sm:inline">Financial Dashboard</span>
+              <span className="sm:hidden">Dashboard</span>
+            </h1>
+            <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1 opacity-60">
+              Welcome, {session?.user?.name?.split(" ")[0] || "User"}
+            </p>
+          </div>
           
-          <div className="flex items-center gap-3 pl-4 border-l border-white/10">
-            <div className="hidden md:block text-right">
-               <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Account</p>
-               <p className="text-sm font-semibold text-slate-200">{session?.user?.name}</p>
+          <div className="flex items-center gap-3">
+            <div className="hidden md:flex flex-col items-end mr-2">
+              <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Account</p>
+              <p className="text-sm font-bold text-slate-200">{session?.user?.name}</p>
             </div>
-            {(session?.user?.image && !imageError) ? (
-              <div className="relative group">
-                <div className="absolute -inset-0.5 bg-emerald-500/20 rounded-full blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
+            
+            <div className="flex items-center gap-2 bg-slate-900/80 backdrop-blur-md border border-white/5 p-1 rounded-full pr-3 pl-1 shadow-xl">
+              {(session?.user?.image && !imageError) ? (
                 <img 
                   src={session.user.image} 
                   alt="user" 
                   onError={() => setImageError(true)}
-                  className="relative w-10 h-10 rounded-full border border-white/20 shadow-2xl object-cover ring-2 ring-emerald-500/10"
+                  className="w-8 h-8 rounded-full border border-white/10 object-cover"
                 />
-              </div>
-            ) : (
-              <div className="relative group">
-                <div className="absolute -inset-0.5 bg-emerald-500/20 rounded-full blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
-                <div className="relative w-10 h-10 rounded-full bg-slate-900 border border-white/20 shadow-2xl flex items-center justify-center text-slate-400 ring-2 ring-emerald-500/10">
-                  <User size={20} />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-slate-500">
+                  <User size={16} />
                 </div>
-              </div>
-            )}
+              )}
+              <button 
+                onClick={() => signOut()}
+                className="p-1.5 text-slate-400 hover:text-white transition-colors"
+                title="Logout"
+              >
+                <LogOut size={16} />
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Desktop Navigation & Actions */}
+        <div className="hidden lg:flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-center gap-2">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as Category | "ALL")}
+                  className={cn(
+                    "flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border",
+                    activeTab === tab.id 
+                      ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 ring-1 ring-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]" 
+                      : "bg-slate-900/50 text-slate-400 border-white/5 hover:bg-slate-900 hover:text-slate-200"
+                  )}
+                >
+                  <tab.icon size={16} />
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-1 bg-slate-900/50 p-1 rounded-2xl border border-white/5">
+              {[
+                { id: "ALL", label: "All Time" },
+                { id: "WEEK", label: "This Week" },
+                { id: "MONTH", label: "This Month" }
+              ].map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => setTimeFilter(f.id as any)}
+                  className={cn(
+                    "px-4 py-2 rounded-xl text-xs font-bold transition-all",
+                    timeFilter === f.id 
+                      ? "bg-white/10 text-white shadow-sm" 
+                      : "text-slate-500 hover:text-slate-300"
+                  )}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="hidden lg:flex items-center gap-4 border-l border-white/5 pl-6">
+            <div className="flex bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden">
+               <button onClick={exportCSV} className="p-3 text-slate-400 hover:text-white hover:bg-emerald-500/10 transition-colors border-r border-white/5" title="Export CSV">
+                 <FileSpreadsheet size={20} />
+               </button>
+               <button onClick={exportPDF} className="p-3 text-slate-400 hover:text-white hover:bg-rose-500/10 transition-colors" title="Export PDF">
+                 <FileText size={20} />
+               </button>
+            </div>
+            
             <button 
-              onClick={() => signOut()}
-              className="p-3 bg-slate-900 border border-white/5 rounded-xl text-slate-400 hover:text-white hover:bg-rose-500/10 hover:border-rose-500/20 transition-all"
-              title="Logout"
+              onClick={() => {
+                setEditingId(null);
+                setFormData({ description: "", amount: "", category: activeTab !== "ALL" ? activeTab : "EXPENSE" });
+                setIsModalOpen(true);
+              }}
+              className="btn-primary flex items-center gap-2"
             >
-              <LogOut size={20} />
+              <Plus size={20} />
+              Add Transaction
             </button>
           </div>
         </div>
-      </header>
 
-      {/* Navigation Tabs */}
-      <nav className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 animate-fade-in delay-75">
-        <div className="flex flex-wrap items-center gap-2">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as Category | "ALL")}
-              className={cn(
-                 "flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border",
-                 activeTab === tab.id 
-                   ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 ring-1 ring-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]" 
-                   : "bg-slate-900/50 text-slate-400 border-white/5 hover:bg-slate-900 hover:text-slate-200"
-              )}
-            >
-              <tab.icon size={16} />
-              {tab.label}
-            </button>
-          ))}
+        {/* Mobile Filter Status Bar */}
+        <div 
+          onClick={() => setIsDrawerOpen(true)}
+          className="lg:hidden flex items-center justify-between bg-white/[0.03] backdrop-blur-md p-4 mb-8 rounded-[24px] border border-white/10 cursor-pointer hover:bg-white/[0.05] transition-all shadow-xl"
+        >
+          <div className="flex items-center gap-3">
+             <div className="p-2 bg-emerald-500/20 rounded-xl text-emerald-400">
+                <Filter size={18} />
+             </div>
+             <div>
+               <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest pl-0.5">Filter Active</p>
+               <div className="flex items-center gap-2 text-sm font-bold text-slate-100">
+                  <span>{tabs.find(t => t.id === activeTab)?.label}</span>
+                  <span className="w-1 h-1 rounded-full bg-slate-600"></span>
+                  <span className="text-slate-400 font-medium">
+                    {timeFilter === "ALL" ? "All Time" : timeFilter === "WEEK" ? "7 Days" : "30 Days"}
+                  </span>
+               </div>
+             </div>
+          </div>
+          <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-500">
+            <Menu size={16} />
+          </div>
         </div>
-
-        <div className="flex items-center gap-1 bg-slate-900/50 p-1 rounded-2xl border border-white/5">
-           {[
-             { id: "ALL", label: "All Time" },
-             { id: "WEEK", label: "This Week" },
-             { id: "MONTH", label: "This Month" }
-           ].map((f) => (
-             <button
-               key={f.id}
-               onClick={() => setTimeFilter(f.id as any)}
-               className={cn(
-                 "px-4 py-2 rounded-xl text-xs font-bold transition-all",
-                 timeFilter === f.id 
-                   ? "bg-white/10 text-white shadow-sm" 
-                   : "text-slate-500 hover:text-slate-300"
-               )}
-             >
-               {f.label}
-             </button>
-           ))}
-        </div>
-      </nav>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 animate-fade-in delay-100">
@@ -774,8 +798,104 @@ export default function Dashboard() {
            </div>
         </div>
       )}
+      {/* Mobile Sticky Add Button (FAB) */}
+      <div className="fixed bottom-6 right-6 z-[60] lg:hidden animate-fade-in">
+        <button 
+           onClick={() => {
+              setEditingId(null);
+              setFormData({ description: "", amount: "", category: activeTab !== "ALL" ? activeTab : "EXPENSE" });
+              setIsModalOpen(true);
+            }}
+          className="w-16 h-16 bg-emerald-500 text-white rounded-full shadow-[0_0_40px_rgba(16,185,129,0.4)] flex items-center justify-center active:scale-95 transition-transform"
+        >
+          <Plus size={32} />
+        </button>
+      </div>
+
+      {/* Mobile Filter Bottom Sheet */}
+      {isDrawerOpen && (
+        <div className="fixed inset-0 z-[100]">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-slate-950/80 backdrop-blur-md animate-fade-in" 
+            onClick={() => setIsDrawerOpen(false)}
+          ></div>
+          
+          {/* Sheet Content */}
+          <div className="absolute left-0 right-0 bottom-0 bg-slate-900 rounded-t-[40px] border-t border-white/10 shadow-2xl animate-slide-up flex flex-col p-8 pt-4">
+            {/* Handle Bar */}
+            <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-8 opacity-40"></div>
+            
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-xl font-bold text-white flex items-center gap-3">
+                <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-500">
+                  <Filter size={20} />
+                </div>
+                Filter Dashboard
+              </h3>
+              <button 
+                onClick={() => setIsDrawerOpen(false)}
+                className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="space-y-8 max-h-[70vh] overflow-y-auto pb-8">
+              <div className="space-y-4">
+                <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] pl-1">Range</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: "ALL", label: "All" },
+                    { id: "WEEK", label: "7 Days" },
+                    { id: "MONTH", label: "30 Days" }
+                  ].map((f) => (
+                    <button
+                      key={f.id}
+                      onClick={() => setTimeFilter(f.id as any)}
+                      className={cn(
+                        "px-4 py-4 rounded-3xl text-xs font-bold transition-all border",
+                        timeFilter === f.id 
+                          ? "bg-emerald-500 text-white border-emerald-400 shadow-lg shadow-emerald-500/20" 
+                          : "bg-slate-800/40 text-slate-400 border-white/5"
+                      )}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] pl-1">Category</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {tabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => {
+                        setActiveTab(tab.id as Category | "ALL");
+                        setIsDrawerOpen(false);
+                      }}
+                      className={cn(
+                        "flex items-center gap-3 px-5 py-5 rounded-[24px] text-sm font-bold transition-all border",
+                        activeTab === tab.id 
+                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" 
+                          : "bg-slate-800/40 text-slate-400 border-white/5"
+                      )}
+                    >
+                      <tab.icon size={18} className={activeTab === tab.id ? "text-emerald-400" : "text-slate-600"} />
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-  );
+  </div>
+);
 }
 
 function SummaryCard({ title, amount, icon: Icon, type, desc }: { 
