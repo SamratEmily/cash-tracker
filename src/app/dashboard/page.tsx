@@ -76,6 +76,8 @@ export default function Dashboard() {
     }
   };
 
+  const [imageError, setImageError] = useState(false);
+
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/");
@@ -83,6 +85,11 @@ export default function Dashboard() {
       fetchTransactions();
     }
   }, [status, router]);
+
+  // Reset image error if user changes
+  useEffect(() => {
+    setImageError(false);
+  }, [session?.user?.image]);
 
   const timeFilteredTransactions = useMemo(() => {
     const now = new Date();
@@ -331,12 +338,23 @@ export default function Dashboard() {
                <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Account</p>
                <p className="text-sm font-semibold text-slate-200">{session?.user?.name}</p>
             </div>
-            {session?.user?.image && (
-              <img 
-                src={session.user.image} 
-                alt="user" 
-                className="w-10 h-10 rounded-full border border-white/10 shadow-lg"
-              />
+            {(session?.user?.image && !imageError) ? (
+              <div className="relative group">
+                <div className="absolute -inset-0.5 bg-emerald-500/20 rounded-full blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
+                <img 
+                  src={session.user.image} 
+                  alt="user" 
+                  onError={() => setImageError(true)}
+                  className="relative w-10 h-10 rounded-full border border-white/20 shadow-2xl object-cover ring-2 ring-emerald-500/10"
+                />
+              </div>
+            ) : (
+              <div className="relative group">
+                <div className="absolute -inset-0.5 bg-emerald-500/20 rounded-full blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
+                <div className="relative w-10 h-10 rounded-full bg-slate-900 border border-white/20 shadow-2xl flex items-center justify-center text-slate-400 ring-2 ring-emerald-500/10">
+                  <User size={20} />
+                </div>
+              </div>
             )}
             <button 
               onClick={() => signOut()}
