@@ -55,7 +55,7 @@ export default function LandingPage() {
              { icon: ShieldCheck, label: "Google Secured" },
              { icon: Wallet, label: "Multi-category Ledger" }
            ].map((feature, i) => (
-             <div key={i} className="flex items-center space-x-3 text-foreground/80 bg-slate-100 dark:bg-slate-900/40 p-3 rounded-2xl border border-border">
+             <div key={i} className="flex items-center space-x-3 text-foreground bg-foreground/5 p-4 rounded-2xl border border-foreground/10 backdrop-blur-sm transition-all hover:bg-foreground/10">
                 <feature.icon className="text-emerald-500" size={20} />
                 <span className="text-sm font-bold">{feature.label}</span>
              </div>
@@ -64,9 +64,9 @@ export default function LandingPage() {
 
         <button
           onClick={() => signIn("google")}
-          className="group relative flex items-center justify-center space-x-3 w-full max-w-sm mx-auto py-4 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-950 text-lg font-bold rounded-2xl transition-all shadow-2xl hover:scale-[1.02] active:scale-95 overflow-hidden"
+          className="group relative flex items-center justify-center space-x-3 w-full max-w-sm mx-auto py-4 bg-emerald-600 hover:bg-emerald-500 text-white text-lg font-bold rounded-2xl transition-all shadow-2xl hover:scale-[1.02] active:scale-95 overflow-hidden"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-transparent transition-opacity group-hover:opacity-100 opacity-0"></div>
+          <div className="absolute inset-0 bg-white/10 transition-opacity group-hover:opacity-100 opacity-0"></div>
           <LogIn size={20} />
           <span>Login with Google</span>
           <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />

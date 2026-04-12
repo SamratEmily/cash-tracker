@@ -325,11 +325,11 @@ export default function Dashboard() {
               <p className="text-sm font-bold text-foreground opacity-90">{session?.user?.name}</p>
             </div>
             
-            <div className="flex items-center gap-2 bg-white/50 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-white/5 p-1 rounded-full pr-3 pl-1 shadow-xl">
+            <div className="flex items-center gap-2 bg-slate-100/50 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 p-1 rounded-full pr-3 pl-1 shadow-lg transition-colors">
               {mounted && (
                 <button 
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-emerald-500 transition-colors"
+                  className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors"
                 >
                   {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
                 </button>
@@ -369,8 +369,8 @@ export default function Dashboard() {
                   className={cn(
                     "flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border",
                     activeTab === tab.id 
-                      ? "bg-emerald-500 text-white border-emerald-400 shadow-xl shadow-emerald-500/10" 
-                      : "bg-white dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-emerald-500 dark:hover:text-emerald-400"
+                      ? "bg-emerald-500 text-white border-emerald-400 shadow-xl shadow-emerald-500/20" 
+                      : "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-emerald-600 dark:hover:text-emerald-400"
                   )}
                 >
                   <tab.icon size={16} />
@@ -392,7 +392,7 @@ export default function Dashboard() {
                     "px-4 py-2 rounded-xl text-xs font-bold transition-all",
                     timeFilter === f.id 
                       ? "bg-emerald-500 text-white shadow-lg" 
-                      : "text-slate-500 dark:text-slate-400 hover:text-emerald-500 dark:hover:text-slate-200"
+                      : "text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-slate-200 transition-colors"
                   )}
                 >
                   {f.label}
@@ -401,9 +401,9 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="hidden lg:flex items-center gap-4 border-l border-slate-200 dark:border-white/5 pl-6">
-            <div className="flex bg-white/50 dark:bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-white/5 rounded-2xl overflow-hidden">
-               <button onClick={exportCSV} className="p-3 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-white hover:bg-emerald-500/10 transition-colors border-r border-slate-200 dark:border-white/5" title="Export CSV">
+          <div className="hidden lg:flex items-center gap-4 border-l border-slate-200 dark:border-white/10 pl-6">
+            <div className="flex bg-slate-100/50 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden">
+               <button onClick={exportCSV} className="p-3 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-white hover:bg-emerald-500/10 transition-colors border-r border-slate-200 dark:border-white/10" title="Export CSV">
                  <FileSpreadsheet size={18} />
                </button>
                <button onClick={exportPDF} className="p-3 text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-white hover:bg-rose-500/10 transition-colors" title="Export PDF">
@@ -436,13 +436,13 @@ export default function Dashboard() {
              </div>
              <div>
                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-widest pl-0.5">Filter Active</p>
-               <div className="flex items-center gap-2 text-sm font-bold text-foreground">
+                <div className="flex items-center gap-2 text-sm font-bold text-foreground">
                   <span>{tabs.find(t => t.id === activeTab)?.label}</span>
-                  <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                  <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700"></span>
                   <span className="text-slate-500 dark:text-slate-400 font-medium">
                     {timeFilter === "ALL" ? "All Time" : timeFilter === "WEEK" ? "7 Days" : "30 Days"}
                   </span>
-               </div>
+                </div>
              </div>
           </div>
           <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
@@ -577,7 +577,7 @@ export default function Dashboard() {
                     content={({ payload }) => (
                       <ul className="flex flex-wrap justify-center gap-4 mt-4">
                         {payload?.map((entry: any, index: number) => (
-                          <li key={`item-${index}`} className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
+                          <li key={`item-${index}`} className="flex items-center gap-2 text-[10px] font-bold text-slate-500 dark:text-slate-400">
                             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }}></div>
                             {entry.value}
                           </li>
@@ -612,8 +612,8 @@ export default function Dashboard() {
                  {activeTab === "ALL" ? "Recent Ledger" : `${activeTab.charAt(0) + activeTab.slice(1).toLowerCase()} Transaction History`}
                </h2>
              </div>
-             <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-950/50 p-1 rounded-xl border border-slate-200 dark:border-white/5">
-                <div className="px-4 py-2 text-sm font-medium text-slate-500 dark:text-slate-400">
+             <div className="flex items-center gap-4 bg-slate-100/50 dark:bg-white/5 p-1 rounded-xl border border-slate-200 dark:border-white/10">
+                <div className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300">
                   Total Balance: <span className={cn("ml-2 font-black", stats.net >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400")}>
                     ${stats.net.toLocaleString()}
                   </span>
@@ -623,8 +623,8 @@ export default function Dashboard() {
           
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50 dark:bg-slate-900/50 text-slate-400 dark:text-slate-500 text-[10px] uppercase tracking-[0.2em] font-black">
+               <thead>
+                <tr className="bg-slate-100/50 dark:bg-white/5 text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-[0.2em] font-black">
                   <th className="px-6 py-5 border-b border-border">Date & Time</th>
                   <th className="px-6 py-5 border-b border-border">Category</th>
                   <th className="px-6 py-5 border-b border-border">Description</th>
@@ -737,7 +737,7 @@ export default function Dashboard() {
                {filteredTransactions.length > 0 && (
                 <tfoot>
                   <tr className="bg-slate-50 dark:bg-slate-900/50 transition-colors">
-                    <td colSpan={3} className="px-6 py-4 font-bold text-slate-400 uppercase text-xs tracking-tighter">
+                     <td colSpan={3} className="px-6 py-4 font-bold text-slate-500 dark:text-slate-400 uppercase text-xs tracking-tighter">
                       {activeTab === "ALL" ? "Ledger Summary" : `${activeTab} Total`} (Items: {filteredTransactions.length})
                     </td>
                     <td className="px-6 py-4 font-black text-xl tabular-nums text-white">
@@ -957,7 +957,7 @@ function SummaryCard({ title, amount, icon: Icon, type, desc }: {
         )}>
           <Icon size={24} />
         </div>
-        <p className="text-xs font-black text-slate-500 dark:text-slate-600 uppercase tracking-widest">{title}</p>
+         <p className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">{title}</p>
       </div>
       
       <div>
