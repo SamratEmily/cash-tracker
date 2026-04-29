@@ -8,7 +8,7 @@ import {
   HandCoins, LayoutDashboard, History, Filter, 
   Trash2, Edit3, X, Save, AlertCircle, Calendar,
   ArrowRightLeft, User, DollarSign, Download, 
-  FileSpreadsheet, FileText, FileDown, Menu
+  FileSpreadsheet, FileText, FileDown, Menu, Sun, Moon
 } from "lucide-react";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -21,8 +21,9 @@ import { twMerge } from "tailwind-merge";
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, 
   Tooltip, ResponsiveContainer, AreaChart, Area, 
-  PieChart, Pie, Cell, Legend
+  PieChart, Pie, Cell, Legend 
 } from 'recharts';
+import { useTheme } from "next-themes";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -40,12 +41,19 @@ interface Transaction {
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
+  const { theme, setTheme } = useTheme();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  // Avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   // Form State
   const [formData, setFormData] = useState({
@@ -280,14 +288,14 @@ export default function Dashboard() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-slate-950">
+      <div className="flex h-screen items-center justify-center bg-background">
          <div className="h-10 w-10 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 pb-24 md:pb-8">
+    <div className="min-h-screen bg-background pb-24 md:pb-8 transition-colors duration-500">
       {/* Premium Gradient Backgrounds */}
       <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
         <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-600/10 blur-[120px] rounded-full"></div>
@@ -298,7 +306,7 @@ export default function Dashboard() {
         {/* Header */}
         <header className="flex items-center justify-between mb-8 animate-fade-in">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2">
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
               <span className="bg-emerald-500 p-1.5 rounded-lg lg:hidden">
                 <Wallet size={20} className="text-white" />
               </span>
@@ -306,18 +314,27 @@ export default function Dashboard() {
               <span className="hidden sm:inline">Financial Dashboard</span>
               <span className="sm:hidden">Dashboard</span>
             </h1>
-            <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1 opacity-60">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1 opacity-60">
               Welcome, {session?.user?.name?.split(" ")[0] || "User"}
             </p>
           </div>
           
           <div className="flex items-center gap-3">
             <div className="hidden md:flex flex-col items-end mr-2">
-              <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Account</p>
-              <p className="text-sm font-bold text-slate-200">{session?.user?.name}</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest">Account</p>
+              <p className="text-sm font-bold text-foreground opacity-90">{session?.user?.name}</p>
             </div>
             
-            <div className="flex items-center gap-2 bg-slate-900/80 backdrop-blur-md border border-white/5 p-1 rounded-full pr-3 pl-1 shadow-xl">
+            <div className="flex items-center gap-2 bg-slate-100/50 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 p-1 rounded-full pr-3 pl-1 shadow-lg transition-colors">
+              {mounted && (
+                <button 
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors"
+                >
+                  {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+                </button>
+              )}
+              <div className="w-px h-4 bg-slate-200 dark:bg-white/10 mx-1"></div>
               {(session?.user?.image && !imageError) ? (
                 <img 
                   src={session.user.image} 
@@ -332,7 +349,7 @@ export default function Dashboard() {
               )}
               <button 
                 onClick={() => signOut()}
-                className="p-1.5 text-slate-400 hover:text-white transition-colors"
+                className="p-1.5 text-slate-400 hover:text-emerald-500 transition-colors"
                 title="Logout"
               >
                 <LogOut size={16} />
@@ -352,8 +369,8 @@ export default function Dashboard() {
                   className={cn(
                     "flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border",
                     activeTab === tab.id 
-                      ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 ring-1 ring-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]" 
-                      : "bg-slate-900/50 text-slate-400 border-white/5 hover:bg-slate-900 hover:text-slate-200"
+                      ? "bg-emerald-500 text-white border-emerald-400 shadow-xl shadow-emerald-500/20" 
+                      : "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-emerald-600 dark:hover:text-emerald-400"
                   )}
                 >
                   <tab.icon size={16} />
@@ -362,7 +379,7 @@ export default function Dashboard() {
               ))}
             </div>
 
-            <div className="flex items-center gap-1 bg-slate-900/50 p-1 rounded-2xl border border-white/5">
+            <div className="flex items-center gap-1 bg-white/50 dark:bg-slate-900/50 p-1 rounded-2xl border border-slate-200 dark:border-white/5 backdrop-blur-md">
               {[
                 { id: "ALL", label: "All Time" },
                 { id: "WEEK", label: "This Week" },
@@ -374,8 +391,8 @@ export default function Dashboard() {
                   className={cn(
                     "px-4 py-2 rounded-xl text-xs font-bold transition-all",
                     timeFilter === f.id 
-                      ? "bg-white/10 text-white shadow-sm" 
-                      : "text-slate-500 hover:text-slate-300"
+                      ? "bg-emerald-500 text-white shadow-lg" 
+                      : "text-slate-500 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-white transition-colors"
                   )}
                 >
                   {f.label}
@@ -384,13 +401,13 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="hidden lg:flex items-center gap-4 border-l border-white/5 pl-6">
-            <div className="flex bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden">
-               <button onClick={exportCSV} className="p-3 text-slate-400 hover:text-white hover:bg-emerald-500/10 transition-colors border-r border-white/5" title="Export CSV">
-                 <FileSpreadsheet size={20} />
+          <div className="hidden lg:flex items-center gap-4 border-l border-slate-200 dark:border-white/10 pl-6">
+            <div className="flex bg-slate-100/50 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden">
+               <button onClick={exportCSV} className="p-3 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-white hover:bg-emerald-500/10 transition-colors border-r border-slate-200 dark:border-white/10" title="Export CSV">
+                 <FileSpreadsheet size={18} />
                </button>
-               <button onClick={exportPDF} className="p-3 text-slate-400 hover:text-white hover:bg-rose-500/10 transition-colors" title="Export PDF">
-                 <FileText size={20} />
+               <button onClick={exportPDF} className="p-3 text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-white hover:bg-rose-500/10 transition-colors" title="Export PDF">
+                 <FileText size={18} />
                </button>
             </div>
             
@@ -411,24 +428,24 @@ export default function Dashboard() {
         {/* Mobile Filter Status Bar */}
         <div 
           onClick={() => setIsDrawerOpen(true)}
-          className="lg:hidden flex items-center justify-between bg-white/[0.03] backdrop-blur-md p-4 mb-8 rounded-[24px] border border-white/10 cursor-pointer hover:bg-white/[0.05] transition-all shadow-xl"
+          className="lg:hidden flex items-center justify-between bg-card dark:bg-white/[0.03] backdrop-blur-md p-4 mb-8 rounded-[24px] border border-border dark:border-white/10 cursor-pointer hover:bg-slate-50 dark:hover:bg-white/[0.05] transition-all shadow-xl"
         >
           <div className="flex items-center gap-3">
-             <div className="p-2 bg-emerald-500/20 rounded-xl text-emerald-400">
+             <div className="p-2 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-xl text-emerald-600 dark:text-emerald-400">
                 <Filter size={18} />
              </div>
              <div>
-               <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest pl-0.5">Filter Active</p>
-               <div className="flex items-center gap-2 text-sm font-bold text-slate-100">
+               <p className="text-[10px] text-slate-400 dark:text-slate-400 font-black uppercase tracking-widest pl-0.5">Filter Active</p>
+                <div className="flex items-center gap-2 text-sm font-bold text-foreground">
                   <span>{tabs.find(t => t.id === activeTab)?.label}</span>
-                  <span className="w-1 h-1 rounded-full bg-slate-600"></span>
-                  <span className="text-slate-400 font-medium">
+                  <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700"></span>
+                  <span className="text-slate-500 dark:text-slate-300 font-medium">
                     {timeFilter === "ALL" ? "All Time" : timeFilter === "WEEK" ? "7 Days" : "30 Days"}
                   </span>
-               </div>
+                </div>
              </div>
           </div>
-          <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-500">
+          <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
             <Menu size={16} />
           </div>
         </div>
@@ -470,13 +487,13 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12 animate-fade-in delay-200">
           <div className="lg:col-span-2 glass-card p-6 h-[400px]">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                 <TrendingUp size={20} className="text-emerald-500" />
                 Cash Flow Analysis
               </h3>
               <div className="flex items-center gap-4 text-xs font-bold">
-                 <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-emerald-500"></div> <span className="text-slate-400">Income</span></div>
-                 <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-rose-500"></div> <span className="text-slate-400">Expense</span></div>
+                 <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-emerald-500"></div> <span className="text-slate-500 dark:text-slate-400">Income</span></div>
+                 <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-rose-500"></div> <span className="text-slate-500 dark:text-slate-400">Expense</span></div>
               </div>
             </div>
             <div className="w-full h-[300px]">
@@ -509,8 +526,14 @@ export default function Dashboard() {
                     tickFormatter={(value) => `$${value}`}
                   />
                   <Tooltip 
-                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #ffffff10', borderRadius: '12px' }}
+                    contentStyle={{ 
+                      backgroundColor: theme === 'dark' ? '#0f172a' : '#ffffff', 
+                      border: `1px solid ${theme === 'dark' ? '#ffffff10' : '#e2e8f0'}`, 
+                      borderRadius: '16px',
+                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                    }}
                     itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
+                    labelStyle={{ color: theme === 'dark' ? '#94a3b8' : '#64748b', fontWeight: 'bold', marginBottom: '4px' }}
                   />
                   <Area type="monotone" dataKey="income" stroke="#10B981" fillOpacity={1} fill="url(#colorIncome)" strokeWidth={3} />
                   <Area type="monotone" dataKey="expense" stroke="#EF4444" fillOpacity={1} fill="url(#colorExpense)" strokeWidth={3} />
@@ -541,7 +564,12 @@ export default function Dashboard() {
                     ))}
                   </Pie>
                   <Tooltip 
-                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #ffffff10', borderRadius: '12px' }}
+                    contentStyle={{ 
+                      backgroundColor: theme === 'dark' ? '#0f172a' : '#ffffff', 
+                      border: `1px solid ${theme === 'dark' ? '#ffffff10' : '#e2e8f0'}`, 
+                      borderRadius: '16px',
+                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                    }}
                   />
                   <Legend 
                     verticalAlign="bottom" 
@@ -549,7 +577,7 @@ export default function Dashboard() {
                     content={({ payload }) => (
                       <ul className="flex flex-wrap justify-center gap-4 mt-4">
                         {payload?.map((entry: any, index: number) => (
-                          <li key={`item-${index}`} className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
+                          <li key={`item-${index}`} className="flex items-center gap-2 text-[10px] font-bold text-slate-500 dark:text-slate-400">
                             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }}></div>
                             {entry.value}
                           </li>
@@ -575,18 +603,18 @@ export default function Dashboard() {
       {/* Main Content Area */}
       <div className="grid grid-cols-1 gap-8 animate-fade-in delay-200">
         <div className="glass-card overflow-hidden">
-          <div className="p-6 border-b border-white/5 flex flex-col md:flex-row justify-between gap-4">
+          <div className="p-6 border-b border-white/5 dark:border-white/5 flex flex-col md:flex-row justify-between gap-4">
              <div className="flex items-center gap-3">
                <div className="p-2 bg-emerald-500/10 rounded-lg">
                  <History className="text-emerald-500" size={20} />
                </div>
-               <h2 className="text-xl font-bold text-white tracking-tight">
+               <h2 className="text-xl font-bold text-foreground tracking-tight">
                  {activeTab === "ALL" ? "Recent Ledger" : `${activeTab.charAt(0) + activeTab.slice(1).toLowerCase()} Transaction History`}
                </h2>
              </div>
-             <div className="flex items-center gap-4 bg-slate-950/50 p-1 rounded-xl border border-white/5">
-                <div className="px-4 py-2 text-sm font-medium text-slate-400">
-                  Total Balance: <span className={cn("ml-2 font-bold", stats.net >= 0 ? "text-emerald-400" : "text-rose-400")}>
+             <div className="flex items-center gap-4 bg-slate-100/50 dark:bg-white/5 p-1 rounded-xl border border-slate-200 dark:border-white/10">
+                <div className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-200">
+                  Total Balance: <span className={cn("ml-2 font-black", stats.net >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400")}>
                     ${stats.net.toLocaleString()}
                   </span>
                 </div>
@@ -595,17 +623,17 @@ export default function Dashboard() {
           
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-900/30 text-slate-500 text-xs uppercase tracking-widest font-bold">
-                  <th className="px-6 py-4 border-b border-white/5">Date & Time</th>
-                  <th className="px-6 py-4 border-b border-white/5">Category</th>
-                  <th className="px-6 py-4 border-b border-white/5">Description</th>
-                  <th className="px-6 py-4 border-b border-white/5 text-right">Amount</th>
-                  <th className="px-6 py-4 border-b border-white/5 text-right">Balance</th>
-                  <th className="px-6 py-4 border-b border-white/5 text-right">Actions</th>
+               <thead>
+                <tr className="bg-slate-100/50 dark:bg-white/10 text-slate-500 dark:text-slate-200 text-[10px] uppercase tracking-[0.2em] font-black">
+                  <th className="px-6 py-5 border-b border-border">Date & Time</th>
+                  <th className="px-6 py-5 border-b border-border">Category</th>
+                  <th className="px-6 py-5 border-b border-border">Description</th>
+                  <th className="px-6 py-5 border-b border-border text-right">Amount</th>
+                  <th className="px-6 py-5 border-b border-border text-right">Balance</th>
+                  <th className="px-6 py-5 border-b border-border text-right">Actions</th>
                 </tr>
               </thead>
-               <tbody className="divide-y divide-white/5">
+               <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                 {filteredTransactions.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
@@ -638,11 +666,17 @@ export default function Dashboard() {
                     });
 
                     return filteredTransactions.map((tx) => (
-                      <tr key={tx.id} className="hover:bg-white/[0.02] transition-colors group">
-                        <td className="px-6 py-4">
-                          <div className="flex flex-col">
-                            <span className="text-slate-300 font-medium">{format(new Date(tx.createdAt), "MMM dd, yyyy")}</span>
-                            <span className="text-[10px] text-slate-600 font-bold uppercase">{format(new Date(tx.createdAt), "hh:mm a")}</span>
+                      <tr key={tx.id} className="hover:bg-emerald-500/[0.02] dark:hover:bg-emerald-500/[0.03] transition-colors border-b border-slate-100 dark:border-white/5 last:border-0 group">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-3">
+                             <div className="flex flex-col items-center justify-center w-14 h-14 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 shadow-sm transition-transform group-hover:scale-105">
+                                <span className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-400 mb-0.5">{format(new Date(tx.createdAt), "MMM")}</span>
+                                <span className="text-lg font-black text-slate-900 dark:text-white leading-none">{format(new Date(tx.createdAt), "dd")}</span>
+                             </div>
+                             <div className="flex flex-col">
+                               <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.1em]">{format(new Date(tx.createdAt), "yyyy")}</span>
+                               <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{format(new Date(tx.createdAt), "hh:mm a")}</span>
+                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4">
@@ -657,37 +691,41 @@ export default function Dashboard() {
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <p className="text-slate-300 font-medium truncate max-w-[200px]">{tx.description}</p>
+                          <p className="text-slate-700 dark:text-slate-200 font-bold truncate max-w-[180px] leading-tight">
+                            {tx.description}
+                          </p>
                         </td>
                         <td className="px-6 py-4 text-right">
                           <span className={cn(
-                            "font-bold tabular-nums",
-                            (tx.category === "INCOME" || tx.category === "RECEIVABLE") ? "text-emerald-400" : "text-rose-400"
+                            "font-black tabular-nums text-sm",
+                            (tx.category === "INCOME" || tx.category === "RECEIVABLE") ? "text-emerald-600 dark:text-emerald-500" : "text-rose-600 dark:text-rose-500"
                           )}>
                             {(tx.category === "EXPENSE" || tx.category === "PAYABLE") ? "-" : "+"}${tx.amount.toLocaleString()}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right">
                           <span className={cn(
-                            "font-black text-white tabular-nums",
+                            "font-black tabular-nums text-sm",
                             balancesMap[tx.id] >= 0 ? "text-emerald-500/80" : "text-rose-500/80"
                           )}>
                             ${balancesMap[tx.id].toLocaleString()}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center justify-end gap-1">
                             <button 
                               onClick={() => handleEdit(tx)}
-                              className="p-2 hover:bg-emerald-500/10 text-emerald-500 rounded-lg transition-colors"
+                              className="w-10 h-10 flex items-center justify-center bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-emerald-500 dark:hover:bg-emerald-500 hover:text-white dark:hover:text-white rounded-xl transition-all shadow-sm active:scale-90"
+                              title="Edit"
                             >
-                              <Edit3 size={18} />
+                              <Edit3 size={16} />
                             </button>
                             <button 
                               onClick={() => handleDelete(tx.id)}
-                              className="p-2 hover:bg-rose-500/10 text-rose-500 rounded-lg transition-colors"
+                              className="w-10 h-10 flex items-center justify-center bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-rose-500 dark:hover:bg-rose-500 hover:text-white dark:hover:text-white rounded-xl transition-all shadow-sm active:scale-90"
+                              title="Delete"
                             >
-                              <Trash2 size={18} />
+                              <Trash2 size={16} />
                             </button>
                           </div>
                         </td>
@@ -698,8 +736,8 @@ export default function Dashboard() {
               </tbody>
                {filteredTransactions.length > 0 && (
                 <tfoot>
-                  <tr className="bg-slate-900/50">
-                    <td colSpan={3} className="px-6 py-4 font-bold text-slate-400 uppercase text-xs tracking-tighter">
+                  <tr className="bg-slate-50 dark:bg-slate-900/50 transition-colors">
+                     <td colSpan={3} className="px-6 py-4 font-bold text-slate-500 dark:text-slate-200 uppercase text-xs tracking-tighter">
                       {activeTab === "ALL" ? "Ledger Summary" : `${activeTab} Total`} (Items: {filteredTransactions.length})
                     </td>
                     <td className="px-6 py-4 font-black text-xl tabular-nums text-white">
@@ -725,21 +763,21 @@ export default function Dashboard() {
       {/* Transaction Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-           <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
-           <div className="z-10 w-full max-w-md bg-slate-900 border border-white/10 rounded-3xl shadow-2xl overflow-hidden animate-fade-in">
-              <div className="p-6 border-b border-white/5 flex justify-between items-center bg-slate-800/20">
-                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+           <div className="absolute inset-0 bg-slate-950/40 dark:bg-slate-950/80 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
+           <div className="z-10 w-full max-w-md bg-card border border-border rounded-[32px] shadow-2xl overflow-hidden animate-fade-in">
+              <div className="p-6 border-b border-border flex justify-between items-center bg-slate-50 dark:bg-slate-800/20">
+                <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
                   <ArrowRightLeft className="text-emerald-500" size={20} />
                   {editingId ? "Edit Transaction" : "New Entry"}
                 </h3>
-                <button onClick={() => setIsModalOpen(false)} className="text-slate-500 hover:text-white">
+                <button onClick={() => setIsModalOpen(false)} className="text-slate-500 hover:text-foreground">
                   <X size={20} />
                 </button>
               </div>
               
               <form onSubmit={handleSubmit} className="p-6 space-y-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">Category</label>
+                  <label className="text-sm font-bold text-slate-500 dark:text-slate-300 uppercase tracking-wider">Category</label>
                   <div className="grid grid-cols-2 gap-3">
                     {["INCOME", "EXPENSE", "RECEIVABLE", "PAYABLE"].map((cat) => (
                       <button
@@ -760,9 +798,9 @@ export default function Dashboard() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">Amount</label>
+                  <label className="text-sm font-bold text-slate-500 dark:text-slate-300 uppercase tracking-wider">Amount</label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">$</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 font-bold">$</span>
                     <input 
                       type="number" 
                       required
@@ -776,7 +814,7 @@ export default function Dashboard() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">Description</label>
+                  <label className="text-sm font-bold text-slate-500 dark:text-slate-300 uppercase tracking-wider">Description</label>
                   <input 
                     type="text" 
                     required
@@ -817,17 +855,17 @@ export default function Dashboard() {
         <div className="fixed inset-0 z-[100]">
           {/* Backdrop */}
           <div 
-            className="absolute inset-0 bg-slate-950/80 backdrop-blur-md animate-fade-in" 
+            className="absolute inset-0 bg-slate-950/40 dark:bg-slate-950/80 backdrop-blur-md animate-fade-in" 
             onClick={() => setIsDrawerOpen(false)}
           ></div>
           
           {/* Sheet Content */}
-          <div className="absolute left-0 right-0 bottom-0 bg-slate-900 rounded-t-[40px] border-t border-white/10 shadow-2xl animate-slide-up flex flex-col p-8 pt-4">
+          <div className="absolute left-0 right-0 bottom-0 bg-card rounded-t-[40px] border-t border-border shadow-2xl animate-fade-in flex flex-col p-8 pt-4">
             {/* Handle Bar */}
-            <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-8 opacity-40"></div>
+            <div className="w-12 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto mb-8 opacity-40"></div>
             
             <div className="flex items-center justify-between mb-8">
-              <h3 className="text-xl font-bold text-white flex items-center gap-3">
+              <h3 className="text-xl font-bold text-foreground flex items-center gap-3">
                 <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-500">
                   <Filter size={20} />
                 </div>
@@ -835,7 +873,7 @@ export default function Dashboard() {
               </h3>
               <button 
                 onClick={() => setIsDrawerOpen(false)}
-                className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400"
+                className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-foreground transition-colors"
               >
                 <X size={20} />
               </button>
@@ -857,7 +895,7 @@ export default function Dashboard() {
                         "px-4 py-4 rounded-3xl text-xs font-bold transition-all border",
                         timeFilter === f.id 
                           ? "bg-emerald-500 text-white border-emerald-400 shadow-lg shadow-emerald-500/20" 
-                          : "bg-slate-800/40 text-slate-400 border-white/5"
+                          : "bg-slate-100 dark:bg-slate-800/40 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/5 hover:bg-slate-200 dark:hover:bg-slate-800/60"
                       )}
                     >
                       {f.label}
@@ -879,11 +917,11 @@ export default function Dashboard() {
                       className={cn(
                         "flex items-center gap-3 px-5 py-5 rounded-[24px] text-sm font-bold transition-all border",
                         activeTab === tab.id 
-                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" 
-                          : "bg-slate-800/40 text-slate-400 border-white/5"
+                          ? "bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/20" 
+                          : "bg-slate-100 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400 border-border"
                       )}
                     >
-                      <tab.icon size={18} className={activeTab === tab.id ? "text-emerald-400" : "text-slate-600"} />
+                      <tab.icon size={18} className={activeTab === tab.id ? "text-white" : "text-slate-400 dark:text-slate-600"} />
                       {tab.label}
                     </button>
                   ))}
@@ -915,16 +953,16 @@ function SummaryCard({ title, amount, icon: Icon, type, desc }: {
       <div className="flex items-center justify-between">
         <div className={cn(
           "p-3 rounded-xl",
-          type === "positive" ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500"
+          type === "positive" ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-500" : "bg-rose-500/10 text-rose-600 dark:text-rose-500"
         )}>
           <Icon size={24} />
         </div>
-        <p className="text-xs font-black text-slate-600 uppercase tracking-widest">{title}</p>
+         <p className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">{title}</p>
       </div>
       
       <div>
-        <h4 className="text-3xl font-black tabular-nums text-white">${amount.toLocaleString()}</h4>
-        <p className="text-xs text-slate-500 mt-1 font-medium italic">{desc}</p>
+        <h4 className="text-3xl font-black tabular-nums text-foreground">${amount.toLocaleString()}</h4>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium italic">{desc}</p>
       </div>
     </div>
   );
