@@ -321,7 +321,7 @@ export default function Dashboard() {
           
           <div className="flex items-center gap-3">
             <div className="hidden md:flex flex-col items-end mr-2">
-              <p className="text-[10px] text-slate-500 dark:text-slate-500 font-black uppercase tracking-widest">Account</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest">Account</p>
               <p className="text-sm font-bold text-foreground opacity-90">{session?.user?.name}</p>
             </div>
             
@@ -392,7 +392,7 @@ export default function Dashboard() {
                     "px-4 py-2 rounded-xl text-xs font-bold transition-all",
                     timeFilter === f.id 
                       ? "bg-emerald-500 text-white shadow-lg" 
-                      : "text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-slate-200 transition-colors"
+                      : "text-slate-500 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-white transition-colors"
                   )}
                 >
                   {f.label}
@@ -435,11 +435,11 @@ export default function Dashboard() {
                 <Filter size={18} />
              </div>
              <div>
-               <p className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-widest pl-0.5">Filter Active</p>
+               <p className="text-[10px] text-slate-400 dark:text-slate-400 font-black uppercase tracking-widest pl-0.5">Filter Active</p>
                 <div className="flex items-center gap-2 text-sm font-bold text-foreground">
                   <span>{tabs.find(t => t.id === activeTab)?.label}</span>
                   <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700"></span>
-                  <span className="text-slate-500 dark:text-slate-400 font-medium">
+                  <span className="text-slate-500 dark:text-slate-300 font-medium">
                     {timeFilter === "ALL" ? "All Time" : timeFilter === "WEEK" ? "7 Days" : "30 Days"}
                   </span>
                 </div>
@@ -613,7 +613,7 @@ export default function Dashboard() {
                </h2>
              </div>
              <div className="flex items-center gap-4 bg-slate-100/50 dark:bg-white/5 p-1 rounded-xl border border-slate-200 dark:border-white/10">
-                <div className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+                <div className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-200">
                   Total Balance: <span className={cn("ml-2 font-black", stats.net >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400")}>
                     ${stats.net.toLocaleString()}
                   </span>
@@ -624,7 +624,7 @@ export default function Dashboard() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
                <thead>
-                <tr className="bg-slate-100/50 dark:bg-white/5 text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-[0.2em] font-black">
+                <tr className="bg-slate-100/50 dark:bg-white/10 text-slate-500 dark:text-slate-200 text-[10px] uppercase tracking-[0.2em] font-black">
                   <th className="px-6 py-5 border-b border-border">Date & Time</th>
                   <th className="px-6 py-5 border-b border-border">Category</th>
                   <th className="px-6 py-5 border-b border-border">Description</th>
@@ -670,11 +670,11 @@ export default function Dashboard() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-3">
                              <div className="flex flex-col items-center justify-center w-14 h-14 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 shadow-sm transition-transform group-hover:scale-105">
-                                <span className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 mb-0.5">{format(new Date(tx.createdAt), "MMM")}</span>
+                                <span className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-400 mb-0.5">{format(new Date(tx.createdAt), "MMM")}</span>
                                 <span className="text-lg font-black text-slate-900 dark:text-white leading-none">{format(new Date(tx.createdAt), "dd")}</span>
                              </div>
                              <div className="flex flex-col">
-                               <span className="text-[10px] font-black text-slate-500 dark:text-slate-500 uppercase tracking-[0.1em]">{format(new Date(tx.createdAt), "yyyy")}</span>
+                               <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.1em]">{format(new Date(tx.createdAt), "yyyy")}</span>
                                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{format(new Date(tx.createdAt), "hh:mm a")}</span>
                              </div>
                           </div>
@@ -691,7 +691,7 @@ export default function Dashboard() {
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <p className="text-slate-700 dark:text-slate-300 font-bold truncate max-w-[180px] leading-tight">
+                          <p className="text-slate-700 dark:text-slate-200 font-bold truncate max-w-[180px] leading-tight">
                             {tx.description}
                           </p>
                         </td>
@@ -737,7 +737,7 @@ export default function Dashboard() {
                {filteredTransactions.length > 0 && (
                 <tfoot>
                   <tr className="bg-slate-50 dark:bg-slate-900/50 transition-colors">
-                     <td colSpan={3} className="px-6 py-4 font-bold text-slate-500 dark:text-slate-400 uppercase text-xs tracking-tighter">
+                     <td colSpan={3} className="px-6 py-4 font-bold text-slate-500 dark:text-slate-200 uppercase text-xs tracking-tighter">
                       {activeTab === "ALL" ? "Ledger Summary" : `${activeTab} Total`} (Items: {filteredTransactions.length})
                     </td>
                     <td className="px-6 py-4 font-black text-xl tabular-nums text-white">
@@ -777,7 +777,7 @@ export default function Dashboard() {
               
               <form onSubmit={handleSubmit} className="p-6 space-y-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">Category</label>
+                  <label className="text-sm font-bold text-slate-500 dark:text-slate-300 uppercase tracking-wider">Category</label>
                   <div className="grid grid-cols-2 gap-3">
                     {["INCOME", "EXPENSE", "RECEIVABLE", "PAYABLE"].map((cat) => (
                       <button
@@ -798,9 +798,9 @@ export default function Dashboard() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">Amount</label>
+                  <label className="text-sm font-bold text-slate-500 dark:text-slate-300 uppercase tracking-wider">Amount</label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">$</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 font-bold">$</span>
                     <input 
                       type="number" 
                       required
@@ -814,7 +814,7 @@ export default function Dashboard() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">Description</label>
+                  <label className="text-sm font-bold text-slate-500 dark:text-slate-300 uppercase tracking-wider">Description</label>
                   <input 
                     type="text" 
                     required
@@ -895,7 +895,7 @@ export default function Dashboard() {
                         "px-4 py-4 rounded-3xl text-xs font-bold transition-all border",
                         timeFilter === f.id 
                           ? "bg-emerald-500 text-white border-emerald-400 shadow-lg shadow-emerald-500/20" 
-                          : "bg-slate-800/40 text-slate-400 border-white/5"
+                          : "bg-slate-100 dark:bg-slate-800/40 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/5 hover:bg-slate-200 dark:hover:bg-slate-800/60"
                       )}
                     >
                       {f.label}
@@ -962,7 +962,7 @@ function SummaryCard({ title, amount, icon: Icon, type, desc }: {
       
       <div>
         <h4 className="text-3xl font-black tabular-nums text-foreground">${amount.toLocaleString()}</h4>
-        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 font-medium italic">{desc}</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium italic">{desc}</p>
       </div>
     </div>
   );
