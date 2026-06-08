@@ -77,6 +77,13 @@
   .badge-payable {
     @apply bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/30 font-black;
   }
+  
+  /* Make table header text green in dark theme */
+  .dark table th,
+  .dark thead th {
+    color: var(--color-brand-green);
+    background-color: white;
+  }
 }
 
 /* Animations */

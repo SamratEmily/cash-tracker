@@ -72,9 +72,9 @@ export default function LandingPage() {
           <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
         </button>
 
-        <p className="text-xs text-slate-400 dark:text-slate-600 uppercase tracking-widest font-bold mt-8">
+        {/* <p className="text-xs text-slate-400 dark:text-slate-600 uppercase tracking-widest font-bold mt-8">
           Powered by Next.js 15 & Prisma
-        </p>
+        </p> */}
       </div>
 
       <footer className="absolute bottom-8 left-0 right-0 text-center text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-widest">
